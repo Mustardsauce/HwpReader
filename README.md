@@ -52,8 +52,10 @@ services:
 
 ### 서버 요청 예시
 ```bash
-curl -X POST http://host.docker.internal:${HwpReader 포트 번호}/api/reader/extract -F "file=@/path/to/hwp or hwpx 파일"
+curl -X POST http://host.docker.internal:${HwpReader 포트}/api/reader/extract -F "file=@/path/to/hwp or hwpx"
 ```
+
+
 
 ---
 
