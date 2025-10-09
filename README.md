@@ -20,7 +20,7 @@ Docker 기반으로 쉽게 배포할 수 있으며, 표의 행(`ROW`)·셀(`CELL
 
 ## 서버 구동 방법
 
-###Setup
+### Setup
 ```bash
 git clone https://github.com/Mustardsauce/HwpReader.git
 cd HwpReader
@@ -48,6 +48,11 @@ services:
       SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: ${MAX_FILE_SIZE}
       SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: ${MAX_REQUEST_SIZE}
     restart: unless-stopped
+```
+
+### 서버 요청 예시
+```bash
+curl -X POST http://host.docker.internal:${HwpReader 포트 번호}/api/reader/extract -F "file=@/path/to/hwp or hwpx 파일"
 ```
 
 ---
