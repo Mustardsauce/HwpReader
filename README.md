@@ -20,22 +20,27 @@ Docker 기반으로 쉽게 배포할 수 있으며, 표의 행(`ROW`)·셀(`CELL
 
 ## 서버 구동 방법
 
+###Setup
 ```bash
 git clone https://github.com/Mustardsauce/HwpReader.git
 cd HwpReader
 docker-compose up -d
 ```
 
-```yaml
-version: "3.9"
+### docker image pull
+```bash
+docker pull mustards94/hwp-reader:latest
+```
 
+### docker-compose.yaml
+```yaml
 services:
   hwp-rest-server:    
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: hwp-rest-server
-    image: mustard94/hwp-rest-server:latest
+    container_name: HwpReader
+    image: mustards94/hwp-reader:latest
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     environment:
@@ -44,6 +49,7 @@ services:
       SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: ${MAX_REQUEST_SIZE}
     restart: unless-stopped
 ```
+
 ---
 
 ## 📚 사용된 오픈소스 라이브러리

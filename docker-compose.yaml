@@ -1,12 +1,10 @@
-version: "3.9"
-
 services:
   hwp-rest-server:    
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: hwp-rest-server
-    image: mustards94/hwp-rest-server:latest
+    container_name: HwpReader
+    image: mustards94/hwp-reader:latest
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     environment:
