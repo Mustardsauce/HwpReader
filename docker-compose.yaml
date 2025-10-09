@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  hwp-rest-server:    
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hwp-rest-server
+    image: mustard94/hwp-rest-server:latest
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    environment:
+      SERVER_PORT: ${SERVER_PORT}
+      SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: ${MAX_FILE_SIZE}
+      SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: ${MAX_REQUEST_SIZE}
+    restart: unless-stopped
