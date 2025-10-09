@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: hwp-rest-server
-    image: mustard94/hwp-rest-server:latest
+    image: mustards94/hwp-rest-server:latest
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     environment:
