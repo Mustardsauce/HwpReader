@@ -49,7 +49,7 @@ services:
       SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: ${MAX_REQUEST_SIZE}
     restart: unless-stopped
 ```
-
+ 
 ### 서버 요청 예시
 ```bash
 curl -X POST http://host.docker.internal:${HwpReader 포트}/api/reader/extract -F "file=@/path/to/hwp or hwpx"
