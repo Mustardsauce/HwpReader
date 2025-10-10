@@ -30,11 +30,27 @@ public class HwpService {
         try {
 
             String filename = file.getOriginalFilename();
-            if (filename == null) {
-                throw new RuntimeException("파일 이름이 없습니다.");
+            if (filename == null || !filename.contains("."))
+            {
+                throw new IllegalArgumentException("Filename is invalid.");
             }
+
             String ext = filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
-            boolean isHwpx = ext.equals("hwpx");
+
+            boolean isHwpx;
+            if (ext.equals("hwpx"))
+            {
+                isHwpx = true;
+            }
+            else if (ext.equals("hwp"))
+            {
+                isHwpx = false;
+            }
+            else
+            {
+                throw new IllegalArgumentException("This file format is not supported.");
+            }
+            
             String tempExt = isHwpx ? ".hwpx" : ".hwp";
 
             // HWPXReader에는 fromInputStream이 없으므로 임시 파일 생성
@@ -54,12 +70,12 @@ public class HwpService {
             TextMarks marks = new TextMarks()
                         .lineBreakAnd("\n")
                         .paraSeparatorAnd("\n")
-                        .tableStartAnd("\n<TABLE>\n")
-                        .tableEndAnd("\n</TABLE>\n")
-                        .tableRowSeparatorAnd(" </ROW>\n<ROW>")            // ✅ 행 구분자
+                        .tableStartAnd("\n<TABLE_START>\n")
+                        .tableEndAnd("\n<TABLE_END>\n")
+                        .tableRowSeparatorAnd(" <ROW_END>\n<ROW_START>")            // ✅ 행 구분자
                         .tableCellSeparatorAnd(" | ")                     // ✅ 셀 구분자
-                        .fieldStartAnd("<CELL>")                          // ✅ 셀 시작
-                        .fieldEndAnd("</CELL>")                           // ✅ 셀 끝
+                        .fieldStartAnd("<FIELD_START>")                          // ✅ 셀 시작
+                        .fieldEndAnd("<FIELD_END>")                           // ✅ 셀 끝
                         .containerStartAnd("- ")                          // ✅ 리스트 항목 시작
                         .containerEndAnd("\n");                           // ✅ 리스트 항목 종료
 
@@ -75,8 +91,8 @@ public class HwpService {
             // 후처리: 불필요한 공백 정리
             if (result != null) {
                 result = result                        
-                        .replaceAll("(<TABLE>\n)", "$1<ROW> ")
-                        .replaceAll("(\n</TABLE>)", " </ROW>$1")
+                        .replaceAll("(<TABLE_START>\n)", "$1<ROW_START> ")
+                        .replaceAll("(\n<TABLE_END>)", " <ROW_END>$1")
                         .replaceAll("\\n{3,}", "\n\n")      // 3줄 이상 공백 제거
                         .replaceAll(" {2,}", " ")           // 공백 2개 이상을 하나로
                         .trim();

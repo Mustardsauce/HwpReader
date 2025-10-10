@@ -20,19 +20,19 @@ Docker 기반으로 쉽게 배포할 수 있으며, 표의 행(`ROW`)·셀(`CELL
 
 ## 서버 구동 방법
 
-### Setup
+### Setup(Local 빌드)
 ```bash
 git clone https://github.com/Mustardsauce/HwpReader.git
 cd HwpReader
-docker-compose up -d
+docker-compose up -d --build
 ```
 
-### docker image pull
+### Setup(docker hub)
 ```bash
 docker pull mustards94/hwp-reader:latest
 ```
 
-### docker-compose.yaml
+### docker-compose.yaml 예시
 ```yaml
 services:
   hwp-rest-server:    
