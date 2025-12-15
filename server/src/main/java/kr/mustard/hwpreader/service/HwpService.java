@@ -2,8 +2,6 @@ package kr.mustard.hwpreader.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,6 +9,7 @@ import java.io.InputStream;
 
 import kr.dogfoot.hwpxlib.object.HWPXFile;
 import kr.dogfoot.hwpxlib.reader.HWPXReader;
+import kr.dogfoot.hwpxlib.writer.HWPXWriter;
 import kr.dogfoot.hwpxlib.tool.textextractor.TextMarks;
 import kr.dogfoot.hwpxlib.tool.textextractor.TextExtractor;
 import kr.dogfoot.hwpxlib.tool.textextractor.TextExtractMethod;
@@ -22,7 +21,7 @@ import kr.dogfoot.hwp2hwpx.Hwp2Hwpx;
 public class HwpService {    
 
     /**
-     * .hwpx 파일에서 텍스트 추출
+     * .hwp 또는 .hwpx 파일에서 텍스트 추출
      */
     public String extract(MultipartFile file) throws Exception {
 
@@ -50,20 +49,21 @@ public class HwpService {
             {
                 throw new IllegalArgumentException("This file format is not supported.");
             }
+
+            HWPXFile hwpxFile;
             
-            String tempExt = isHwpx ? ".hwpx" : ".hwp";
-
-            // HWPXReader에는 fromInputStream이 없으므로 임시 파일 생성
-            tempFile = File.createTempFile("upload-", tempExt);
-            try (InputStream is = file.getInputStream();
-                FileOutputStream fos = new FileOutputStream(tempFile)) {
-                is.transferTo(fos);
+            if (isHwpx) {
+                // hwpx: File 객체 필요 (HWPXReader가 InputStream 미지원)
+                tempFile = File.createTempFile("upload-", ".hwpx");
+                try (InputStream is = file.getInputStream();
+                     FileOutputStream fos = new FileOutputStream(tempFile)) {
+                    is.transferTo(fos);
+                }
+                hwpxFile = HWPXReader.fromFile(tempFile);
+            } else {
+                // hwp: InputStream으로 직접 읽기 (임시 파일 불필요)
+                hwpxFile = Hwp2Hwpx.toHWPX(HWPReader.fromInputStream(file.getInputStream()));
             }
-
-            // HWPX 파일 로드
-            HWPXFile hwpxFile = isHwpx
-                            ? HWPXReader.fromFile(tempFile) 
-                            : Hwp2Hwpx.toHWPX(HWPReader.fromFile(tempFile));
 
             // 텍스트 구분자 설정
             // (표 시작/끝, 행/열 구분을 명시적으로 추가)
@@ -101,6 +101,56 @@ public class HwpService {
             return result != null ? result.trim() : "";
             
         } finally {       
+            if (tempFile != null && tempFile.exists()) {
+                boolean deleted = tempFile.delete();
+                if (!deleted) {
+                    tempFile.deleteOnExit();
+                }
+            }
+        }
+    }
+
+    /**
+     * .hwp 또는 .hwpx 파일을 받아서 hwpx 바이너리 데이터를 반환
+     * - hwp 파일인 경우: hwpx로 변환 후 반환
+     * - hwpx 파일인 경우: 정규화하여 반환
+     */
+    public byte[] convertToHwpxBinary(MultipartFile file) throws Exception {
+        File tempFile = null;
+        
+        try {
+            String filename = file.getOriginalFilename();
+            if (filename == null || !filename.contains(".")) {
+                throw new IllegalArgumentException("Invalid filename.");
+            }
+
+            String ext = filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
+
+            // hwp 또는 hwpx 파일만 허용
+            if (!ext.equals("hwp") && !ext.equals("hwpx")) {
+                throw new IllegalArgumentException("Only .hwp and .hwpx files are supported.");
+            }
+
+            HWPXFile hwpxFile;
+            
+            if (ext.equals("hwp")) {
+                // hwp: InputStream으로 직접 읽기 (임시 파일 불필요)
+                hwpxFile = Hwp2Hwpx.toHWPX(HWPReader.fromInputStream(file.getInputStream()));
+            } else {
+                // hwpx: File 객체 필요 (HWPXReader가 InputStream 미지원)
+                tempFile = File.createTempFile("upload-", ".hwpx");
+                try (InputStream is = file.getInputStream();
+                     FileOutputStream fos = new FileOutputStream(tempFile)) {
+                    is.transferTo(fos);
+                }
+                hwpxFile = HWPXReader.fromFile(tempFile);
+            }
+
+            // HWPXFile 객체를 바이트 배열로 변환 (통일된 방식)
+            return HWPXWriter.toBytes(hwpxFile);
+
+        } finally {
+            // 임시 파일 정리
             if (tempFile != null && tempFile.exists()) {
                 boolean deleted = tempFile.delete();
                 if (!deleted) {

@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: HwpReader
-    image: mustards94/hwp-reader:latest
+    image: mustards94/hwp-reader:v0.1.0
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     environment:

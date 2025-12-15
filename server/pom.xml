@@ -21,7 +21,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <version>6.1.3</version>
+            <version>6.2.1</version>
         </dependency>
 
         <!-- HWP / HWPX -->
@@ -33,7 +33,7 @@
         <dependency>
             <groupId>kr.dogfoot</groupId>
             <artifactId>hwpxlib</artifactId>
-            <version>1.0.7</version>
+            <version>1.0.8</version>
         </dependency>
         <dependency>
             <groupId>kr.dogfoot</groupId>

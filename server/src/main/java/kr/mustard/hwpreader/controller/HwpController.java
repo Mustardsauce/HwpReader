@@ -35,4 +35,22 @@ public class HwpController {
                 .body(new ExtractResponse("Error: " + e.getMessage(), null));
         }
     }
+
+    /**
+     * - hwp 파일은 hwpx로 변환
+     * - hwpx 파일은 정규화하여 반환
+     */
+    @PostMapping("/content")
+    public ResponseEntity<byte[]> convertToHwpx(@RequestParam("file") MultipartFile file) {
+        try {
+            byte[] hwpxData = hwpService.convertToHwpxBinary(file);
+            return ResponseEntity.ok(hwpxData);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 }
